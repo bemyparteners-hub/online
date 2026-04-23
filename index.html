@@ -441,8 +441,8 @@
             </g>
           </svg>
         </div>
-        <select class="full" aria-label="Gamme">
-          <option selected>Bavette</option>
+        <select id="selectGamme" class="full" aria-label="Gamme">
+          <option value="">— choisir —</option>
         </select>
       </fieldset>
 
@@ -470,8 +470,8 @@
             </g>
           </svg>
         </div>
-        <select class="full" aria-label="Article">
-          <option selected>Bv2</option>
+        <select id="selectArticle" class="full" aria-label="Article">
+          <option value="">— choisir —</option>
         </select>
       </fieldset>
 
@@ -479,9 +479,11 @@
         <legend>Paramètres généraux</legend>
         <div class="row">
           <label for="matiere" style="min-width: 54px;">Matière :</label>
-          <select id="matiere" class="full">
-            <option selected>AC75-7032</option>
-          </select>
+          <input id="inputMatiere" type="text" class="control full"
+  placeholder="Tapez RAL, nom, épaisseur..." autocomplete="off"/>
+<div id="matiereDropdown" style="display:none; position:absolute;
+  z-index:999; background:#fff; border:1px solid #ccc;
+  max-height:180px; overflow-y:auto; width:100%;"></div>
         </div>
         <div class="row">
           <label for="epaisseur" style="min-width: 54px;">Épaisseur :</label>
@@ -559,5 +561,65 @@
       <button class="big-plus" aria-label="Ajouter">+</button>
     </div>
   </div>
+<script src="data/database.js"></script>
+<script src="engine/geometry.js"></script>
+<script>
+(function() {
+  // 1. Peupler Gammes
+  const selGamme = document.getElementById('selectGamme');
+  const selArticle = document.getElementById('selectArticle');
+
+  (window.PLIALU_FAMILLES || []).forEach(f => {
+    const o = document.createElement('option');
+    o.value = f; o.textContent = f;
+    selGamme.appendChild(o);
+  });
+
+  // 2. Gamme → Articles
+  selGamme.addEventListener('change', function() {
+    selArticle.innerHTML = '<option value="">— choisir —</option>';
+    const articles = (window.PLIALU_ARTICLES || [])
+      .filter(a => a.famille === this.value);
+    articles.forEach(a => {
+      const o = document.createElement('option');
+      o.value = a.article; o.textContent = a.article;
+      selArticle.appendChild(o);
+    });
+  });
+
+  // 3. Autocomplete matière
+  const inp = document.getElementById('inputMatiere');
+  const drop = document.getElementById('matiereDropdown');
+
+  if (inp && drop) {
+    inp.addEventListener('input', function() {
+      const q = this.value.trim();
+      drop.innerHTML = '';
+      if (q.length < 2) { drop.style.display='none'; return; }
+      const results = (window.searchMaterials ||
+        function(q){ return (window.PLIALU_MATERIALS||[])
+          .filter(m=>m.name.toLowerCase().includes(q.toLowerCase()))
+          .slice(0,15); })(q);
+      if (!results.length) { drop.style.display='none'; return; }
+      results.forEach(m => {
+        const d = document.createElement('div');
+        d.textContent = m.name + ' — ' + m.family;
+        d.style.cssText = 'padding:5px 8px;cursor:pointer;font-size:12px;';
+        d.onmouseenter = () => d.style.background='#eef';
+        d.onmouseleave = () => d.style.background='';
+        d.onclick = () => {
+          inp.value = m.name;
+          drop.style.display = 'none';
+        };
+        drop.appendChild(d);
+      });
+      drop.style.display = 'block';
+    });
+    document.addEventListener('click', e => {
+      if (!inp.contains(e.target)) drop.style.display='none';
+    });
+  }
+})();
+</script>
 </body>
 </html>
