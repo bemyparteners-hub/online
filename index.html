@@ -3,36 +3,561 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="PLIALU — Configurateur de façonnage aluminium. Bavettes, couvertines, solins. Base de 275 articles et 1023 matières." />
-  <meta name="color-scheme" content="light" />
-  <title>PLIALU — Configurateur façonnage aluminium</title>
+  <title>Configurateur d'affaires</title>
+  <style>
+    :root {
+      --bg: #f2f2f2;
+      --panel: #f4f4f4;
+      --line: #cfcfcf;
+      --line-dark: #bdbdbd;
+      --text: #2f2f2f;
+      --muted: #666;
+      --white: #fff;
+      --accent: #5ea8ff;
+      --input: #ffffff;
+      --shadow: inset 0 1px 0 rgba(255,255,255,.75);
+    }
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    * { box-sizing: border-box; }
 
-  <link rel="stylesheet" href="styles/app.css" />
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      color: var(--text);
+      background: #e9e9e9;
+    }
+
+    body {
+      padding: 6px;
+    }
+
+    .window {
+      height: calc(100vh - 12px);
+      min-height: 760px;
+      background: var(--bg);
+      border: 1px solid #d9d9d9;
+      display: grid;
+      grid-template-rows: 170px 1fr 64px;
+      gap: 10px;
+      padding: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .titlebar {
+      position: absolute;
+      top: 6px;
+      left: 10px;
+      font-size: 13px;
+      color: #444;
+      pointer-events: none;
+    }
+
+    fieldset {
+      margin: 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 10px 8px 8px;
+      min-width: 0;
+    }
+
+    legend {
+      padding: 0 4px;
+      font-size: 13px;
+      color: #444;
+    }
+
+    .top {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 31% 22% 22% 25%;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 30.5% 69.5%;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    .win-btn, .icon-btn, .big-plus, .gear-btn {
+      border: 1px solid var(--line);
+      background: linear-gradient(#fbfbfb, #ececec);
+      box-shadow: var(--shadow);
+      color: #3b3b3b;
+      cursor: pointer;
+    }
+
+    .win-btn:hover, .icon-btn:hover, .big-plus:hover, .gear-btn:hover {
+      filter: brightness(0.98);
+    }
+
+    .win-btn, .icon-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 2px;
+      display: inline-grid;
+      place-items: center;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .icon-btn.blue-outline {
+      border-color: #85b8f8;
+      box-shadow: 0 0 0 1px #cfe4ff inset;
+      color: #3f8ef0;
+      background: linear-gradient(#ffffff, #eef6ff);
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .row label {
+      min-width: 28px;
+      font-size: 13px;
+    }
+
+    .control, select, input[type="text"], input[type="number"] {
+      height: 26px;
+      border: 1px solid var(--line);
+      background: var(--input);
+      padding: 3px 8px;
+      font-size: 13px;
+      color: #2f2f2f;
+      outline: none;
+    }
+
+    input[type="number"] { padding-right: 4px; }
+
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #777 50%),
+        linear-gradient(135deg, #777 50%, transparent 50%),
+        linear-gradient(#f4f4f4, #ececec);
+      background-position:
+        calc(100% - 14px) 11px,
+        calc(100% - 9px) 11px,
+        100% 0;
+      background-size: 5px 5px, 5px 5px, 28px 100%;
+      background-repeat: no-repeat;
+      padding-right: 34px;
+    }
+
+    .control.small { width: 70px; }
+    .control.medium { width: 180px; }
+    .control.full, .full { width: 100%; }
+
+    .affaire-body {
+      display: grid;
+      grid-template-columns: 1fr 230px;
+      gap: 10px;
+      height: 100%;
+      align-items: center;
+    }
+
+    .affaire-form {
+      align-self: start;
+      padding-top: 4px;
+    }
+
+    .logo-box {
+      height: 100%;
+      display: grid;
+      place-items: center;
+    }
+
+    .hexagon-logo {
+      width: 210px;
+      max-width: 100%;
+      display: block;
+    }
+
+    .thumb-area {
+      height: 104px;
+      border: 1px solid transparent;
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+      background: #f6f6f6;
+    }
+
+    .thumb-area svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .details-panel {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .details-empty {
+      height: calc(100% - 12px);
+      background: #f6f6f6;
+      border: 1px solid transparent;
+    }
+
+    .saisies-panel {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: 0;
+      gap: 10px;
+    }
+
+    .saisies-top {
+      display: grid;
+      grid-template-columns: 105px 1fr;
+      align-items: start;
+      min-height: 0;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 95px;
+    }
+
+    .mini-group {
+      border: 1px solid var(--line);
+      background: #f7f7f7;
+      padding: 10px 8px 8px;
+      position: relative;
+    }
+
+    .mini-group-title {
+      position: absolute;
+      top: -9px;
+      left: 8px;
+      padding: 0 4px;
+      font-size: 12px;
+      background: var(--panel);
+      color: #444;
+    }
+
+    .dim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 8px;
+      column-gap: 6px;
+      align-items: center;
+    }
+
+    .dim-grid label {
+      justify-self: end;
+      font-size: 12px;
+    }
+
+    .dim-grid input,
+    .rep-grid input {
+      width: 100%;
+      text-align: right;
+      padding-right: 8px;
+    }
+
+    .rep-grid {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .blank-zone {
+      height: 100%;
+      background: #f6f6f6;
+      border: 1px solid transparent;
+    }
+
+    .calc-strip {
+      border: 1px solid var(--line);
+      min-height: 60px;
+      position: relative;
+      background: #f6f6f6;
+    }
+
+    .calc-title {
+      position: absolute;
+      top: -9px;
+      left: 8px;
+      background: var(--panel);
+      padding: 0 4px;
+      font-size: 12px;
+      color: #444;
+    }
+
+    .calc-actions {
+      position: absolute;
+      left: 0;
+      bottom: -1px;
+      display: flex;
+      gap: 8px;
+      padding: 10px 0 0 0;
+      transform: translateY(100%);
+    }
+
+    .gear-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 3px;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      color: #5b9df2;
+    }
+
+    .big-plus {
+      width: 42px;
+      height: 42px;
+      border-radius: 3px;
+      display: grid;
+      place-items: center;
+      color: #5ea8ff;
+      font-size: 40px;
+      font-weight: 300;
+      line-height: 0.8;
+    }
+
+    .footer-logo {
+      align-self: end;
+      opacity: 0.95;
+    }
+
+    .footer-logo svg {
+      width: 120px;
+      height: auto;
+      display: block;
+    }
+
+    .qty-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qty-wrap input { width: 100%; }
+
+    .muted { color: var(--muted); }
+
+    @media (max-width: 1350px) {
+      .top { grid-template-columns: 1fr 1fr; }
+      .main { grid-template-columns: 1fr; }
+      .window { min-height: 1200px; height: auto; }
+    }
+  </style>
 </head>
 <body>
-  <div id="root">
-    <div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:'JetBrains Mono',monospace;color:#6b7684;letter-spacing:1px;">
-      CHARGEMENT…
+  <div class="window">
+    <div class="titlebar">Configurateur d'affaires</div>
+
+    <div class="top">
+      <fieldset>
+        <legend>Affaire</legend>
+        <div class="affaire-body">
+          <div class="affaire-form">
+            <div class="row" style="margin-top:-2px; margin-bottom: 54px;">
+              <button class="icon-btn blue-outline" aria-label="Ajouter">+</button>
+            </div>
+            <div class="row">
+              <label for="nom">Nom</label>
+              <input id="nom" type="text" class="control medium" value="Devis du 2026-04-21 12h25" />
+              <button class="icon-btn" aria-label="Ouvrir">📁</button>
+            </div>
+          </div>
+
+          <div class="logo-box" aria-hidden="true">
+            <svg class="hexagon-logo" viewBox="0 0 360 140">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1">
+                  <stop offset="0" stop-color="#56c3c0"/>
+                  <stop offset="1" stop-color="#4aa1ff"/>
+                </linearGradient>
+                <linearGradient id="g2" x1="0" x2="1">
+                  <stop offset="0" stop-color="#b7df5a"/>
+                  <stop offset="1" stop-color="#52b4b1"/>
+                </linearGradient>
+              </defs>
+              <g transform="translate(5,15)">
+                <polygon points="0,45 28,20 43,53 15,78" fill="url(#g2)"/>
+                <polygon points="29,19 70,0 60,47 42,52" fill="#7bd06d"/>
+                <polygon points="15,78 43,53 60,97 30,113" fill="#3ca8dd"/>
+                <polygon points="43,53 60,47 90,88 60,97" fill="#2a8fc6"/>
+                <polygon points="60,47 70,0 118,29 90,88" fill="#74d5d9"/>
+                <polygon points="90,88 118,29 116,85 60,97" fill="#1f87b8"/>
+              </g>
+              <text x="135" y="55" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="700" fill="#111">HEXAGON</text>
+              <text x="137" y="82" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" fill="#222">MANUFACTURING INTELLIGENCE</text>
+            </svg>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Gammes</legend>
+        <div class="thumb-area">
+          <svg viewBox="0 0 360 120" aria-hidden="true">
+            <rect width="360" height="120" fill="#f7f7f7"/>
+            <g transform="translate(24,18) scale(.88)">
+              <defs>
+                <g id="piece">
+                  <polygon points="0,12 25,0 58,8 33,21" fill="#ffffff" stroke="#d36ae0" stroke-width="1.5"/>
+                  <polyline points="33,21 58,8 58,21 33,34 0,26 0,12" fill="none" stroke="#a5a5a5" stroke-width="1.3"/>
+                  <line x1="12" y1="14" x2="20" y2="10" stroke="#8ad45c" stroke-width="2"/>
+                </g>
+              </defs>
+              <g>
+                <use href="#piece" x="0" y="0"/>
+                <use href="#piece" x="62" y="0"/>
+                <use href="#piece" x="124" y="0"/>
+                <use href="#piece" x="186" y="0"/>
+                <use href="#piece" x="248" y="0"/>
+
+                <use href="#piece" x="0" y="38"/>
+                <use href="#piece" x="62" y="38"/>
+                <use href="#piece" x="124" y="38"/>
+                <use href="#piece" x="186" y="38"/>
+                <use href="#piece" x="248" y="38"/>
+
+                <use href="#piece" x="0" y="76"/>
+                <use href="#piece" x="62" y="76"/>
+                <use href="#piece" x="124" y="76"/>
+                <use href="#piece" x="186" y="76"/>
+                <use href="#piece" x="248" y="76"/>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <select class="full" aria-label="Gamme">
+          <option selected>Bavette</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>Articles</legend>
+        <div class="thumb-area">
+          <svg viewBox="0 0 360 120" aria-hidden="true">
+            <rect width="360" height="120" fill="#f7f7f7"/>
+            <g transform="translate(95,12)">
+              <polygon points="40,10 130,0 215,35 126,46" fill="#f8d7fb" stroke="#d65ce4" stroke-width="2"/>
+              <polygon points="126,46 215,35 215,80 126,92" fill="#efc3f3" stroke="#d65ce4" stroke-width="2"/>
+              <polygon points="40,10 126,46 126,92 40,56" fill="#f6dbf8" stroke="#d65ce4" stroke-width="2"/>
+              <line x1="62" y1="84" x2="195" y2="99" stroke="#d65ce4" stroke-width="2"/>
+              <line x1="52" y1="84" x2="52" y2="26" stroke="#d65ce4" stroke-dasharray="5 4" stroke-width="2"/>
+              <line x1="80" y1="23" x2="133" y2="0" stroke="#d65ce4" stroke-dasharray="5 4" stroke-width="2"/>
+              <line x1="203" y1="41" x2="243" y2="24" stroke="#d65ce4" stroke-dasharray="5 4" stroke-width="2"/>
+              <path d="M146 36 l38 20 l-28 12 l-22 -16 z" fill="#ef2d2d" opacity=".9"/>
+              <path d="M114 30 q7 -9 16 0" fill="none" stroke="#32d22d" stroke-width="4" stroke-linecap="round"/>
+              <text x="74" y="108" fill="#ef2d2d" font-size="16" font-family="Segoe UI, Arial">pliA</text>
+              <text x="198" y="12" fill="#ef2d2d" font-size="16" font-family="Segoe UI, Arial">pliB</text>
+              <text x="45" y="38" fill="#ff00d4" font-size="18" font-family="Segoe UI, Arial">C</text>
+              <text x="40" y="70" fill="#ff00d4" font-size="18" font-family="Segoe UI, Arial">B</text>
+              <text x="166" y="102" fill="#ff00d4" font-size="18" font-family="Segoe UI, Arial">A</text>
+              <text x="118" y="87" fill="#7b52ff" font-size="17" font-family="Segoe UI, Arial">Lg</text>
+            </g>
+          </svg>
+        </div>
+        <select class="full" aria-label="Article">
+          <option selected>Bv2</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>Paramètres généraux</legend>
+        <div class="row">
+          <label for="matiere" style="min-width: 54px;">Matière :</label>
+          <select id="matiere" class="full">
+            <option selected>AC75-7032</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="epaisseur" style="min-width: 54px;">Épaisseur :</label>
+          <select id="epaisseur" class="full">
+            <option selected>0,75</option>
+          </select>
+        </div>
+        <div class="row" style="margin-bottom:0;">
+          <label for="quantite" style="min-width: 54px;">Quantité :</label>
+          <div class="qty-wrap full">
+            <input id="quantite" type="number" value="1" />
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="main">
+      <fieldset class="details-panel">
+        <legend>Détails</legend>
+        <div class="details-empty"></div>
+      </fieldset>
+
+      <fieldset class="saisies-panel">
+        <legend>Saisies</legend>
+
+        <div class="saisies-top">
+          <div class="stack">
+            <div class="mini-group">
+              <div class="mini-group-title">Repere</div>
+              <div class="rep-grid">
+                <label for="rep">Rep :</label>
+                <input id="rep" type="text" value="Bv" />
+              </div>
+            </div>
+
+            <div class="mini-group">
+              <div class="mini-group-title">Dimensions</div>
+              <div class="dim-grid">
+                <label for="a">A :</label><input id="a" type="number" value="10" />
+                <label for="b">B :</label><input id="b" type="number" value="30" />
+                <label for="c">C :</label><input id="c" type="number" value="150" />
+                <label for="lg">Lg :</label><input id="lg" type="number" value="3000" />
+                <label for="plia">pliA :</label><input id="plia" type="number" value="45" />
+                <label for="plib">pliB :</label><input id="plib" type="number" value="93" />
+              </div>
+            </div>
+          </div>
+
+          <div class="blank-zone"></div>
+        </div>
+
+        <div class="calc-strip">
+          <div class="calc-title">Champs calculés</div>
+          <div class="calc-actions">
+            <button class="gear-btn" aria-label="Paramètres">⚙</button>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="bottom">
+      <div class="footer-logo" aria-hidden="true">
+        <svg viewBox="0 0 220 60">
+          <g transform="translate(0,4)">
+            <polygon points="0,28 18,12 28,32 10,48" fill="#8ed46a"/>
+            <polygon points="18,12 42,0 36,28 28,32" fill="#67c7c9"/>
+            <polygon points="10,48 28,32 36,56 18,60" fill="#3ca8dd"/>
+            <polygon points="28,32 36,28 56,50 36,56" fill="#2a8fc6"/>
+          </g>
+          <text x="62" y="32" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" fill="#111">HEXAGON</text>
+          <text x="62" y="47" font-family="Segoe UI, Arial, sans-serif" font-size="8.5" font-weight="600" fill="#333">MANUFACTURING INTELLIGENCE</text>
+        </svg>
+      </div>
+
+      <button class="big-plus" aria-label="Ajouter">+</button>
     </div>
   </div>
-
-  <!-- React (build production, vendu localement — aucune CDN requise) -->
-  <script src="vendor/react.production.min.js"></script>
-  <script src="vendor/react-dom.production.min.js"></script>
-
-  <!-- Base de données unifiée (articles + matières + profils + helpers) -->
-  <script src="data/database.js"></script>
-
-  <!-- Moteur de calcul géométrique -->
-  <script src="engine/geometry.js"></script>
-
-  <!-- UI React pré-compilée depuis les sources JSX de app/*.jsx (voir build.sh) -->
-  <script src="app/View2D.js"></script>
-  <script src="app/View3D.js"></script>
-  <script src="app/App.js"></script>
 </body>
 </html>
