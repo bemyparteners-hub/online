@@ -569,7 +569,7 @@
   const selGamme = document.getElementById('selectGamme');
   const selArticle = document.getElementById('selectArticle');
 
-  (window.PLIALU_FAMILLES || []).forEach(f => {
+  (window.Plialu.FAMILLES || []).forEach(f => {
     const o = document.createElement('option');
     o.value = f; o.textContent = f;
     selGamme.appendChild(o);
@@ -578,7 +578,7 @@
   // 2. Gamme → Articles
   selGamme.addEventListener('change', function() {
     selArticle.innerHTML = '<option value="">— choisir —</option>';
-    const articles = (window.PLIALU_ARTICLES || [])
+    const articles = (window.Plialu.ARTICLES || [])
       .filter(a => a.famille === this.value);
     articles.forEach(a => {
       const o = document.createElement('option');
@@ -596,8 +596,8 @@
       const q = this.value.trim();
       drop.innerHTML = '';
       if (q.length < 2) { drop.style.display='none'; return; }
-      const results = (window.searchMaterials ||
-        function(q){ return (window.PLIALU_MATERIALS||[])
+      const results = (window.Plialu.searchMaterials ||
+        function(q){ return (window.Plialu.MATERIALS||[])
           .filter(m=>m.name.toLowerCase().includes(q.toLowerCase()))
           .slice(0,15); })(q);
       if (!results.length) { drop.style.display='none'; return; }
